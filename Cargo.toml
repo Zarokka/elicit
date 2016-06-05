@@ -1,0 +1,6 @@
+[package]
+name = "elicit"
+version = "0.1.0"
+authors = ["Martin Wohli <martin@wohli.org>"]
+
+[dependencies]

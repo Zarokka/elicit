@@ -1,0 +1,64 @@
+
+= Elicit - The simpler find with the more complicated name
+
+[quote, wordnik]
+____
+e-lic-it
+
+- To bring or draw out (something latent); educe.
+- To arrive at (a truth, for example) by logic.
+- To call forth, draw out, or provoke (a reaction, for example).
+
+https://www.wordnik.com/words/elicit
+____
+
+Elicit is simple command line utility to *elicit* files matching something given (or to *find* files, but turns out that name was already taken ;))
+
+[WARNING]
+This project was started with the intention to learn rust and not to replace find.
+
+[WARNING]
+It does not do do much of anything yet. It is work in progress.
+
+[NOTE]
+This project tries to use Readme-Driven-Development, everything marked with TODO is not implemented.
+
+== Usage
+
+- TODO find all files recursively from the current directory with "hello" in the name
+[source, sh]
+----
+elicit hello
+----
+
+- TODO find all files recursively in the home directory with "hello" in the name
+[source, sh]
+----
+elicit hello ~/
+----
+TODO what order makes more sense pattern dir or dir pattern?
+
+
+- TODO find all files recursively in the home directory that have "hello" and somewhere later ".adoc" in the name
+[source, sh]
+----
+elicit "hello*.adoc" ~/
+----
+
+- TODO find all files recursively in the home directory where the name starts with "hello" and ends with ".adoc"
+[source, sh]
+----
+elicit -r "^hello.*\.adoc$" ~/
+elicit "^hello.*\.adoc$" ~/ --regex
+----
+Switch from simple mode to regex mode with -r or --regex somewhere in the line
+
+=== Considered Alternative Syntax
+
+Maybe it would be better to have an alternatively syntax that would be more sentence like.
+[source, sh]
+----
+elicit regex "^hello.*\.adoc$" in ~/
+elicit in ~/ "hello*.adoc" with depth of 1 and files only
+----
+(Probably not, at least not like this)
