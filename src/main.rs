@@ -1,4 +1,5 @@
 mod argparse;
+mod filesearch;
 use std::io::{self, Write};
 use std::fs::{self, DirEntry};
 use std::path::Path;

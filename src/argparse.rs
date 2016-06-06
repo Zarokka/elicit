@@ -1,7 +1,7 @@
 
 // the 'a is for lifetime management TODO learn more
 #[derive(Default)]
-struct ArgumentStore<'a> {
+pub struct ArgumentStore<'a> {
     pattern: Option<&'a str>,
     dir: Option<&'a str>,
     isregex: bool,
@@ -14,7 +14,7 @@ struct ArgumentStore<'a> {
 //     }
 // }
 
-fn parseargs(args: &Vec<String>) -> ArgumentStore {
+pub fn parseargs(args: &Vec<String>) -> ArgumentStore {
     let mut argstore: ArgumentStore = Default::default();
 
     // for (i, arg) in args.iter().enumerate() {

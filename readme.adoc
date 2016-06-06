@@ -53,6 +53,8 @@ elicit "^hello.*\.adoc$" ~/ --regex
 ----
 Switch from simple mode to regex mode with -r or --regex somewhere in the line
 
+- TODO print usage on illegal use or -h or --help
+
 === Considered Alternative Syntax
 
 Maybe it would be better to have an alternatively syntax that would be more sentence like.
