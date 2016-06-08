@@ -2,9 +2,9 @@
 // the 'a is for lifetime management TODO learn more
 #[derive(Default)]
 pub struct ArgumentStore<'a> {
-    pattern: Option<&'a str>,
-    dir: Option<&'a str>,
-    isregex: bool,
+    pub pattern: Option<&'a str>,
+    pub dir: Option<&'a str>,
+    pub isregex: bool,
 }
 
 // default values could be set like this
