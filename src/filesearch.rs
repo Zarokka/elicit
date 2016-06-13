@@ -27,10 +27,21 @@ impl<'a> Iterator for HitIterator<'a> {
         
         match readdir.next() {
             Some(v) => {
-                // TODO check if dir
-                let entrypath = v.unwrap().file_name();
+                // TODO dont panic, always retrun None on Error?
+                // what if permission to one dir fails, but rest would work?
                 self.readdirs.push(readdir);
-                return Some(entrypath);
+                let entry = v.unwrap();
+                if entry.file_type().unwrap().is_dir() {
+                    self.readdirs.push(fs::read_dir(entry.path()).unwrap());
+                    return self.next();
+                }
+
+                let filename = entry.file_name();
+                if filename.to_str().unwrap().contains(self.args.pattern.unwrap()) {
+                    return Some(filename);
+                }
+
+               return self.next(); 
             },
             None => {
                 return self.next();
@@ -103,6 +114,7 @@ mod filesearchtest {
         let mut hititer = filesearch::find(args).unwrap();
 
         let mut results : Vec<OsString> = hititer.collect();
+        results.sort();
 
 
         assert_eq!(results.len(), 2);
