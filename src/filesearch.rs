@@ -23,15 +23,15 @@ impl<'a> Iterator for HitIterator<'a> {
         if self.readdirs.len() == 0 {
             return None;
         }
-        let mut readdir = self.readdirs.pop().unwrap();
-        
-        match readdir.next() {
+        //let mut readdir = self.readdirs.get_mut(0).unwrap();
+
+        match self.readdirs.get_mut(0).unwrap().next() {
             Some(v) => {
                 // TODO dont panic, always retrun None on Error?
                 // what if permission to one dir fails, but rest would work?
-                self.readdirs.push(readdir);
                 let entry = v.unwrap();
                 if entry.file_type().unwrap().is_dir() {
+                    //TODO lower levels should have the parent path in them (until search root levelt)
                     self.readdirs.push(fs::read_dir(entry.path()).unwrap());
                     return self.next();
                 }
@@ -44,6 +44,7 @@ impl<'a> Iterator for HitIterator<'a> {
                return self.next(); 
             },
             None => {
+                self.readdirs.remove(0);
                 return self.next();
             }
 
@@ -98,6 +99,18 @@ mod filesearchtest {
         createfile(&tempdir, "hello");
         createfile(&tempdir, "whatuphelloworld");
         createfile(&tempdir, "no_he_ll_o_in_this_file_name");
+
+        tempdir.push("2nd level");
+        create_dir(&tempdir).expect("Can not create 2nd level temporary testing directory");
+
+        createfile(&tempdir, "2nd level hello");
+        createfile(&tempdir, "another none match");
+        createfile(&tempdir, "xyz");
+
+        tempdir.push("3rd level");
+        create_dir(&tempdir).expect("Can not create 3rd level temporary testing directory");
+        createfile(&tempdir, "hello from the 3rd level");
+        createfile(&tempdir, "another none match");
     }
 
 
@@ -114,12 +127,14 @@ mod filesearchtest {
         let mut hititer = filesearch::find(args).unwrap();
 
         let mut results : Vec<OsString> = hititer.collect();
+        assert_eq!(results.len(), 4);
+        let mut lvl2results = results.split_off(2);
         results.sort();
 
-
-        assert_eq!(results.len(), 2);
         assert_eq!(results[0], OsString::from("hello"));
         assert_eq!(results[1], OsString::from("whatuphelloworld"));
+        assert_eq!(lvl2results[0], OsString::from("2nd level hello"));
+        assert_eq!(lvl2results[1], OsString::from("hello from the 3rd level"));
     }
 
 
