@@ -1,9 +1,9 @@
 use argparse::ArgumentStore;
-use std::fs::{self, DirEntry, ReadDir};
+use std::fs::{self, ReadDir};
 use std::path::PathBuf;
 use std::env;
 use std::io::Result;
-use std::ffi::OsString;
+use std::iter::Iterator;
 
 pub struct HitIterator<'a> {
     args: ArgumentStore<'a>,
@@ -17,9 +17,9 @@ pub struct HitIterator<'a> {
 
 impl<'a> Iterator for HitIterator<'a> {
 
-    type Item = OsString;
+    type Item = PathBuf;
 
-    fn next(&mut self) -> Option<OsString> {
+    fn next(&mut self) -> Option<PathBuf> {
         if self.readdirs.len() == 0 {
             return None;
         }
@@ -38,7 +38,7 @@ impl<'a> Iterator for HitIterator<'a> {
 
                 let filename = entry.file_name();
                 if filename.to_str().unwrap().contains(self.args.pattern.unwrap()) {
-                    return Some(filename);
+                    return Some(entry.path());
                 }
 
                return self.next(); 
@@ -49,18 +49,15 @@ impl<'a> Iterator for HitIterator<'a> {
             }
 
         }
-
-        //Some("hello")
-        None
     }
 }
 
-fn find(args: ArgumentStore) -> Result<HitIterator> {
+pub fn find(args: ArgumentStore) -> Result<HitIterator> {
 
     let dir: PathBuf = if args.dir.is_some() {
         PathBuf::from(args.dir.unwrap())
     } else {
-        env::current_dir().unwrap()  
+        try![env::current_dir()]
     };
 
     Ok(HitIterator {args: args, readdirs: vec![try!(fs::read_dir(dir))]})
@@ -74,7 +71,6 @@ mod filesearchtest {
     use argparse::ArgumentStore;
     use std::path::PathBuf;
     use std::env;
-    use std::io;
     use std::fs::remove_dir_all;
     use std::fs::create_dir;
     use std::fs::File;
@@ -124,17 +120,17 @@ mod filesearchtest {
 
         let args = ArgumentStore{pattern:Some("hello"), dir: tempdir.to_str(), isregex: false};
 
-        let mut hititer = filesearch::find(args).unwrap();
+        let hititer = filesearch::find(args).unwrap();
 
-        let mut results : Vec<OsString> = hititer.collect();
+        let mut results : Vec<PathBuf> = hititer.collect();
         assert_eq!(results.len(), 4);
-        let mut lvl2results = results.split_off(2);
+        let lvl2results = results.split_off(2);
         results.sort();
 
-        assert_eq!(results[0], OsString::from("hello"));
-        assert_eq!(results[1], OsString::from("whatuphelloworld"));
-        assert_eq!(lvl2results[0], OsString::from("2nd level hello"));
-        assert_eq!(lvl2results[1], OsString::from("hello from the 3rd level"));
+        assert_eq!(results[0].to_str().unwrap(), "hello");
+        assert_eq!(results[1].to_str().unwrap(), "whatuphelloworld");
+        assert_eq!(lvl2results[0].to_str().unwrap(), "2nd level/2nd level hello");
+        assert_eq!(lvl2results[1].to_str().unwrap(), "3rd level/hello from the 3rd level");
     }
 
 
