@@ -6,11 +6,11 @@ use std::env;
 
 
 fn main() {
-    let args : Vec<String> = env::args().skip(1).collect();
+    let args: Vec<String> = env::args().skip(1).collect();
     let argstore = argparse::parseargs(&args);
 
-    let hititer : HitIterator = filesearch::find(argstore).unwrap();
-    //let mut results : Vec<PathBuf> = hititer.collect();
+    let hititer: HitIterator = filesearch::find(argstore).unwrap();
+    // let mut results : Vec<PathBuf> = hititer.collect();
 
     // loop {
     //     match hititer.next() {
@@ -20,6 +20,6 @@ fn main() {
     // }
     // for hit in &hititer gave trait bounds not satisfied error, why?
     for hit in hititer {
-       println!("{:?}", hit);
+        println!("{:?}", hit);
     }
 }
