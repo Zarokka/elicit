@@ -1,8 +1,7 @@
 use argparse::ArgumentStore;
-use std::fs::{self, ReadDir};
+use std::fs::{self, ReadDir, DirEntry};
 use std::path::PathBuf;
 use std::iter::Iterator;
-use std::env;
 use std::io::{self, Result, Error, Write};
 
 
@@ -11,10 +10,38 @@ pub struct HitIterator<'a> {
     readdirs: Vec<ReadDir>,
 }
 
-// impl<'a> HitIterator<'a> {
-//     fn new(args: ArgumentStore) -> HitIterator {
-//     }
-// }
+impl<'a> HitIterator<'a> {
+    fn next_result(&mut self) -> Result<Option<PathBuf>> {
+
+        if self.readdirs.len() == 0 {
+            return Ok(None);
+        }
+        // get_mut should be save, because of the above check
+        match self.readdirs.get_mut(0).unwrap().next() {
+            Some(v) => {
+                let entry: DirEntry = try!(v);
+                if try!(entry.file_type()).is_dir() {
+                    let nextreaddir = try!(fs::read_dir(entry.path()));
+                    self.readdirs.push(nextreaddir);
+                    return self.next_result();
+                }
+
+                let filename = entry.file_name();
+                // TODO don't panic if the filename cannot be convertet to a string
+                if filename.into_string().unwrap().contains(self.args.pattern.unwrap()) {
+                    return Ok(Some(entry.path()));
+                }
+
+                return self.next_result();
+            }
+            None => {
+                self.readdirs.remove(0);
+                return self.next_result();
+            }
+
+        }
+    }
+}
 
 fn print_err(err: &Error) {
     let r = writeln!(&mut io::stderr(), "{}", err);
@@ -25,54 +52,15 @@ impl<'a> Iterator for HitIterator<'a> {
     type Item = PathBuf;
 
     fn next(&mut self) -> Option<PathBuf> {
-        if self.readdirs.len() == 0 {
-            return None;
-        }
-        // TODO macro the error stuff, maybe allow the user to specify an error function
-        // add the path to error where it occured (currently only "Permission denied (os error 13)")
-        match self.readdirs.get_mut(0).unwrap().next() {
-            Some(v) => {
-                let entry = match v {
-                    Ok(v) => v,
-                    Err(e) => {
-                        print_err(&e);
-                        return self.next();
-                    }
-                };
-                match entry.file_type() {
-                    Ok(v) => {
-                        if v.is_dir() {
-                            match fs::read_dir(entry.path()) {
-                                Ok(v) => {
-                                    self.readdirs.push(v);
-                                }
-                                Err(e) => {
-                                    print_err(&e);
-                                }
-                            }
-                            return self.next();
-                        }
-                    }
-                    Err(e) => {
-                        print_err(&e);
-                        return self.next();
-                    }
-                }
-
-                let filename = entry.file_name();
-                // TODO don't panic
-                if filename.to_str().unwrap().contains(self.args.pattern.unwrap()) {
-                    return Some(entry.path());
-                }
-
+        match self.next_result() {
+            Ok(res) => {
+                return res;
+            }
+            Err(e) => {
+                print_err(&e);
                 return self.next();
             }
-            None => {
-                self.readdirs.remove(0);
-                return self.next();
-            }
-
-        }
+        };
     }
 }
 
@@ -81,10 +69,10 @@ pub fn find(args: ArgumentStore) -> Result<HitIterator> {
     let dir: PathBuf = if args.dir.is_some() {
         PathBuf::from(args.dir.unwrap())
     } else {
-        //TODO platform independent relative path
+        // TODO platform independent relative path
         PathBuf::from("./")
         // this would give the full current path
-        //try![env::current_dir()]
+        // try![env::current_dir()]
     };
 
     Ok(HitIterator {
@@ -159,7 +147,7 @@ mod filesearchtest {
         let lvl2results = results.split_off(2);
         results.sort();
 
-        //TODO use platform independent path separator
+        // TODO use platform independent path separator
         assert_eq!(results[0].to_str().unwrap(), format!("{}/hello", dirstr));
         assert_eq!(results[1].to_str().unwrap(),
                    format!("{}/whatuphelloworld", dirstr));
