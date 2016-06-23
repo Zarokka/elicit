@@ -25,35 +25,62 @@ This project tries to use Readme-Driven-Development, everything marked with TODO
 
 == Usage
 
+- TODO general usage
+[source, sh]
+----
+elicit [options] [starting-direcotry] pattern
+----
+
+=== Options
+
+- --help TODO +
+  output a usage information
+  
+- -r, --regex TODO +
+  interpret the pattern as a regular expression
+
+=== Examples
+
 - TODO find all files recursively from the current directory with "hello" in the name
++
 [source, sh]
 ----
 elicit hello
 ----
 
 - TODO find all files recursively in the home directory with "hello" in the name
++
 [source, sh]
 ----
 elicit hello ~/
 ----
++
 TODO what order makes more sense pattern dir or dir pattern?
 
 
 - TODO find all files recursively in the home directory that have "hello" and somewhere later ".adoc" in the name
++
 [source, sh]
 ----
 elicit "hello*.adoc" ~/
 ----
 
 - TODO find all files recursively in the home directory where the name starts with "hello" and ends with ".adoc"
++
 [source, sh]
 ----
 elicit -r "^hello.*\.adoc$" ~/
 elicit "^hello.*\.adoc$" ~/ --regex
 ----
++
 Switch from simple mode to regex mode with -r or --regex somewhere in the line
 
-- TODO print usage on illegal use or -h or --help
+- TODO print usage on illegal use or --help
+
+=== TODO Examples of piping output to other programs
+
+- TODO rm, ls, cp, grep, file
+
 
 === Considered Alternative Syntax
 
