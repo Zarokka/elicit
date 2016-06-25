@@ -21,7 +21,7 @@ This project was started with the intention to learn rust and not to replace fin
 It does not do do much of anything yet. It is work in progress.
 
 [NOTE]
-This project tries to use Readme-Driven-Development, everything marked with TODO is not implemented.
+This project tries to use Readme-Driven-Development, everything marked with TODO is not fully implemented.
 
 == Usage
 
@@ -33,7 +33,7 @@ elicit [options] [starting-direcotry] pattern
 
 === Options
 
-- --help TODO +
+- --help +
   output a usage information
   
 - -r, --regex TODO +
@@ -52,7 +52,7 @@ elicit hello
 +
 [source, sh]
 ----
-elicit hello ~/
+elicit ~/ hello
 ----
 +
 TODO what order makes more sense pattern dir or dir pattern?
@@ -62,7 +62,7 @@ TODO what order makes more sense pattern dir or dir pattern?
 +
 [source, sh]
 ----
-elicit "hello*.adoc" ~/
+elicit ~/ "hello*.adoc"
 ----
 
 - TODO find all files recursively in the home directory where the name starts with "hello" and ends with ".adoc"
@@ -75,7 +75,7 @@ elicit "^hello.*\.adoc$" ~/ --regex
 +
 Switch from simple mode to regex mode with -r or --regex somewhere in the line
 
-- TODO print usage on illegal use or --help
+- print usage on illegal use or --help
 
 === TODO Examples of piping output to other programs
 

@@ -7,17 +7,22 @@ use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
-    let argstore = argparse::parseargs(&args);
+    let argstore = match argparse::parseargs(&args) {
+        Some(v) => v,
+        None => {
+            println!("Usage: elicit [OPTIONS] [DIRECTORY] PATTERN \n\
+                      Elicit (or find) files recursively from the DIRECTORY that contain the \
+                      given PATTERN\n(or match the given PATTERN as regex if option -r or --regex \
+                      is used).\n\n\
+                      Options: \n  \
+                        -r, --regex\tpattern is a regular expression (NOT YET IMPLEMENTED) \n      \
+                            --help\tshow this message");
+            return;
+        }
+    };
 
     let hititer: HitIterator = filesearch::find(argstore).unwrap();
-    // let mut results : Vec<PathBuf> = hititer.collect();
 
-    // loop {
-    //     match hititer.next() {
-    //         Some(hit) => { println!("{:?}", hit);},
-    //         None => break,
-    //     }
-    // }
     // for hit in &hititer gave trait bounds not satisfied error, why?
     for hit in hititer {
         println!("{:?}", hit);

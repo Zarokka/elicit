@@ -5,12 +5,12 @@ use std::iter::Iterator;
 use std::io::{self, Result, Error, Write};
 
 
-pub struct HitIterator<'a> {
-    args: ArgumentStore<'a>,
+pub struct HitIterator {
+    pattern: String,
     readdirs: Vec<ReadDir>,
 }
 
-impl<'a> HitIterator<'a> {
+impl HitIterator {
     fn next_result(&mut self) -> Result<Option<PathBuf>> {
 
         if self.readdirs.len() == 0 {
@@ -28,7 +28,8 @@ impl<'a> HitIterator<'a> {
 
                 let filename = entry.file_name();
                 // TODO don't panic if the filename cannot be convertet to a string
-                if filename.into_string().unwrap().contains(self.args.pattern.unwrap()) {
+                let filename: String = filename.into_string().unwrap();
+                if filename.as_str().contains(self.pattern.as_str()) {
                     return Ok(Some(entry.path()));
                 }
 
@@ -48,7 +49,7 @@ fn print_err(err: &Error) {
     r.expect("Failed to write error to stderr!");
 }
 
-impl<'a> Iterator for HitIterator<'a> {
+impl Iterator for HitIterator {
     type Item = PathBuf;
 
     fn next(&mut self) -> Option<PathBuf> {
@@ -66,6 +67,7 @@ impl<'a> Iterator for HitIterator<'a> {
 
 pub fn find(args: ArgumentStore) -> Result<HitIterator> {
 
+    // TODO require pattern
     let dir: PathBuf = if args.dir.is_some() {
         PathBuf::from(args.dir.unwrap())
     } else {
@@ -76,7 +78,7 @@ pub fn find(args: ArgumentStore) -> Result<HitIterator> {
     };
 
     Ok(HitIterator {
-        args: args,
+        pattern: args.pattern.unwrap(),
         readdirs: vec![try!(fs::read_dir(dir))],
     })
 }
@@ -135,8 +137,8 @@ mod filesearchtest {
         assert!(tempdir.exists());
         let dirstr = tempdir.to_str().unwrap();
         let args = ArgumentStore {
-            pattern: Some("hello"),
-            dir: Some(dirstr),
+            pattern: Some("hello".to_string()),
+            dir: Some(dirstr.to_string()),
             isregex: false,
         };
 
