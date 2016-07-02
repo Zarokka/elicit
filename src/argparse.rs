@@ -97,7 +97,7 @@ mod argparsetest {
 
     #[test]
     fn argparse_noargs_test() {
-        let mut v: Vec<String> = Vec::<String>::new();
+        let v: Vec<String> = Vec::<String>::new();
         assert!(parseargs(&v).is_none());
     }
 

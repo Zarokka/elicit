@@ -3,43 +3,55 @@ use std::fs::{self, ReadDir, DirEntry};
 use std::path::PathBuf;
 use std::iter::Iterator;
 use std::io::{self, Result, Error, Write};
+use std::collections::vec_deque::VecDeque;
 
 
 pub struct HitIterator {
-    pattern: String,
-    readdirs: Vec<ReadDir>,
+    patterns: Vec<String>,
+    readdir: ReadDir,
+    paths: VecDeque<PathBuf>
 }
 
 impl HitIterator {
+
+    fn matches(&self, filename: &&str) -> bool {
+        let mut index :usize = 0;
+        for pattern in &self.patterns {
+            match filename[index..].find(pattern) {
+                Some(i) => index = i,
+                None => return false,
+            }
+        }
+        return true;
+    }
+
     fn next_result(&mut self) -> Result<Option<PathBuf>> {
 
-        if self.readdirs.len() == 0 {
-            return Ok(None);
-        }
-        // get_mut should be save, because of the above check
-        match self.readdirs.get_mut(0).unwrap().next() {
+        match self.readdir.next() {
             Some(v) => {
                 let entry: DirEntry = try!(v);
                 if try!(entry.file_type()).is_dir() {
-                    let nextreaddir = try!(fs::read_dir(entry.path()));
-                    self.readdirs.push(nextreaddir);
+                    self.paths.push_back(entry.path());
                     return self.next_result();
                 }
 
                 let filename = entry.file_name();
                 // TODO don't panic if the filename cannot be convertet to a string
                 let filename: String = filename.into_string().unwrap();
-                if filename.as_str().contains(self.pattern.as_str()) {
+                if self.matches(&filename.as_str()) {
                     return Ok(Some(entry.path()));
                 }
 
                 return self.next_result();
             }
             None => {
-                self.readdirs.remove(0);
+
+                if self.paths.len() == 0 {
+                    return Ok(None);
+                }
+                self.readdir = try!(fs::read_dir(self.paths.pop_front().unwrap()));
                 return self.next_result();
             }
-
         }
     }
 }
@@ -77,9 +89,11 @@ pub fn find(args: ArgumentStore) -> Result<HitIterator> {
         // try![env::current_dir()]
     };
 
+
     Ok(HitIterator {
-        pattern: args.pattern.unwrap(),
-        readdirs: vec![try!(fs::read_dir(dir))],
+        patterns: args.pattern.unwrap().split("*").map(|s| s.to_string()).collect(),
+        readdir: try!(fs::read_dir(dir)),
+        paths: VecDeque::new(),
     })
 }
 
@@ -94,7 +108,7 @@ mod filesearchtest {
     use std::fs::remove_dir_all;
     use std::fs::create_dir;
     use std::fs::File;
-    use filesearch::{self, HitIterator};
+    use filesearch;
 
     fn createfile(path: &PathBuf, filename: &str) {
         let mut path = path.clone();

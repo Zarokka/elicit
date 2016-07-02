@@ -21,10 +21,16 @@ fn main() {
         }
     };
 
-    let hititer: HitIterator = filesearch::find(argstore).unwrap();
+    let mut hititer: HitIterator = filesearch::find(argstore).unwrap();
 
     // for hit in &hititer gave trait bounds not satisfied error, why?
-    for hit in hititer {
-        println!("{:?}", hit);
+    // for hit in hititer {
+    //     println!("{:?}", hit);
+    // }
+    loop {
+        match hititer.next() {
+           Some(hit) => println!("{:?}", hit),
+           None => break,
+        }
     }
 }
