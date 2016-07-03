@@ -15,13 +15,13 @@ ____
 Elicit is simple command line utility to *elicit* files matching something given (or to *find* files, but turns out that name was already taken ;))
 
 [WARNING]
-This project was started with the intention to learn rust and not to replace find.
-
-[WARNING]
-It does not do do much of anything yet. It is work in progress.
+This project was started with the intention to learn rust and not to replace find, but it may be useful for simple file searches.
 
 [NOTE]
-This project tries to use Readme-Driven-Development, everything marked with TODO is not fully implemented.
+It now uses the awesome https://github.com/BurntSushi/walkdir[walkdir crate]. For a somehow working version (stackoverflows if there are no hits for a while, and potentially other bugs) without walkdir see the without_walkdir branch.
+
+[NOTE]
+Only tested on Linux (x86_64). Should theoretically be platform independent.
 
 == Usage
 
@@ -36,13 +36,7 @@ elicit [options] [starting-direcotry] pattern
 - --help +
   output a usage information
   
-- -r, --regex TODO +
-  interpret the pattern as a regular expression
-
 === Examples
-
-[NOTE]
-below examples not marked with TODO work, but it stackoverflows if there is no hit for a while (too much recursion in the current logic)
 
 - find all files recursively from the current directory with "hello" in the name
 +
@@ -62,23 +56,11 @@ TODO what order makes more sense pattern dir or dir pattern?
 
 
 - find all files recursively in the home directory that have "hello" and somewhere later ".adoc" in the name (not necessarily at the end)
-  TODO add tests for the matching logic
 +
 [source, sh]
 ----
 elicit ~/ "hello*.adoc"
 ----
-
-- TODO find all files recursively in the home directory where the name starts with "hello" and ends with ".adoc"
-  maybe not useful, this should be as simple as possible, for this usecase find should be used
-+
-[source, sh]
-----
-elicit -r "^hello.*\.adoc$" ~/
-elicit "^hello.*\.adoc$" ~/ --regex
-----
-+
-Switch from simple mode to regex mode with -r or --regex somewhere in the line
 
 - print usage on illegal use or --help
 
@@ -96,3 +78,15 @@ elicit regex "^hello.*\.adoc$" in ~/
 elicit in ~/ "hello*.adoc" with depth of 1 and files only
 ----
 (Probably not, at least not like this)
+
+=== Considered additional features
+
+==== Regex
+Find all files recursively in the home directory where the name starts with "hello" and ends with ".adoc"
+[source, sh]
+----
+elicit -r "^hello.*\.adoc$" ~/
+elicit "^hello.*\.adoc$" ~/ --regex
+----
+Switch from simple mode to regex mode with -r or --regex somewhere in the line.
+Probably only very rarely useful, elicit should be as simple as possible, for this usecase find should be used.

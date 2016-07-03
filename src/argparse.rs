@@ -35,19 +35,18 @@ pub fn parseargs(args: &Vec<String>) -> Option<ArgumentStore> {
                 }
             }
         }
-
     }
 
     Some(argstore)
 }
 
 #[cfg(test)]
-mod argparsetest {
+mod tests {
 
     use argparse::{ArgumentStore, parseargs};
 
     #[test]
-    fn argparse_onearg_test() {
+    fn one_arg() {
         let mut v: Vec<String> = Vec::<String>::new();
         v.push("hello".to_string());
         let args: ArgumentStore = parseargs(&v).unwrap();
@@ -58,7 +57,7 @@ mod argparsetest {
     }
 
     #[test]
-    fn argparse_twoargs_test() {
+    fn two_args() {
         let mut v: Vec<String> = Vec::<String>::new();
         v.push("~/".to_string());
         v.push("hello".to_string());
@@ -70,7 +69,7 @@ mod argparsetest {
     }
 
     #[test]
-    fn argparse_threargs1_test() {
+    fn three_args() {
         let mut v: Vec<String> = Vec::<String>::new();
         v.push("-r".to_string());
         v.push("~/".to_string());
@@ -83,7 +82,7 @@ mod argparsetest {
     }
 
     #[test]
-    fn argparse_threargs2_test() {
+    fn three_args_2() {
         let mut v: Vec<String> = Vec::<String>::new();
         v.push("./somepath".to_string());
         v.push("whatup".to_string());
@@ -96,13 +95,13 @@ mod argparsetest {
     }
 
     #[test]
-    fn argparse_noargs_test() {
+    fn no_args() {
         let v: Vec<String> = Vec::<String>::new();
         assert!(parseargs(&v).is_none());
     }
 
     #[test]
-    fn argparse_toomanyargs_test() {
+    fn too_many_args() {
         let mut v: Vec<String> = Vec::<String>::new();
         v.push("./somepath".to_string());
         v.push("whatup".to_string());
@@ -112,7 +111,7 @@ mod argparsetest {
     }
 
     #[test]
-    fn argparse_help_test() {
+    fn help() {
         let mut v: Vec<String> = Vec::<String>::new();
         v.push("--help".to_string());
         assert!(parseargs(&v).is_none());
